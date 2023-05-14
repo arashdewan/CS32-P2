@@ -1,0 +1,379 @@
+DESCRIPTION OF DOUBLY-LINKED LIST DESIGN
+__________________________________________
+
+This design of a doubly-linked list implementation revolves around the foundation of the head and tail which begins with them just being nullptr.
+It is able to insert, remove, find, swap, along with a variety of other functions by taking advantage of nodes pointing to each other through the use of next and previous.
+Each element of the doubly-linked list is its own separate object, which holds the value, alongside a reference to the node before it, and the node after it.
+This makes these variations of functions which conduct changings or findings for the value possible.
+The structure of a Typical Sequence would be as such:
+(pointing back to nullptr)<-> [head] <-> [] <-> [] <-> [] <-> [tail] <-> (pointing to nullptr)
+
+
+PSUEDOCODE FOR NON-TRIVIAL ALGORITHMS
+__________________________________________
+
+Sequence();
+CONSTRUCTOR
+
+~Sequence();
+DECONSTRUCTOR
+
+Sequence(const Sequence& other);
+COPY CONSTRUCTOR
+if the other sequence is just nullptr,
+    then construct sequence to act similar to a regular constructor
+otherwise,
+    make the head and tail nullptr and size 0 so it is reset
+repeatedly:
+    traverse over the other sequence and input them into the sequence
+
+Sequence& operator=(const Sequence& other);
+ASSIGNMENT OPERATOR
+if the other sequence is the same as the sequence
+    just give back this
+otherwise
+    swap the values using a temporary sequence
+
+bool empty() const;
+if the head and tail nullptr and size is 0 is empty
+    then return true
+else return false
+
+int size() const;
+return the length of the sequence
+
+int insert(int pos, const ItemType& value);
+if the position is greater than the size or less than 0
+    return -1
+if to insert at index 0 and the head is nullptr
+    make a new node that head and tail are set to, and make next and previous nullptr
+otherwise if to insert at the end
+    make a new node that is set to the value and update the original tail, then add the new node to become the new tail
+otherwise to insert at index 0 and there is a head
+    make a new node that is set to the value and update the original head, then add the new node to become the new head
+otherwise if to insert node somewhere in between
+    make a new node set to the value
+    traverse through the entirety until you reach the given position
+    make the proper updates so that the positions of the original nodes nexts and previous are changed, and the new node is inserted
+increment the size to fit the inserted node
+return the position in which it was inserted
+
+int insert(const ItemType& value);
+if the head is nullptr and size 0
+    then just insert value at the 0 index and return p
+because the list is not empty
+traverse through the sequence
+    if you find a value less than or equal to the value
+        insert the new value at p position and update the nexts of the value
+return the given p position of value
+
+bool erase(int pos);
+if there any any invalid sizes or position is greater than size
+    return false
+otherwise
+    if the sequence is only one value
+        delete the head
+    otherwise for sequence bigger than one value
+        delete the header and update the previous of the new head
+    otherwise
+    traverse through to find the position of the delete
+    if it comes to the tail, delete the tail and update the previous node to become the new tail
+    if the node is somewhere in the index of the list, update the prev and nexts and list and delete the node in the position
+
+int remove(const ItemType& value);
+traverse through the entirety of the sequence
+    erase whenever you come across the value
+keep a counter through the loop and return the amount of numbers erased
+
+bool get(int pos, ItemType& value) const;
+if the position is invalid, then return false
+otherwise
+    create a new node and make a counter
+    loop so that you copy value into the node at position
+    and return true
+
+bool set(int pos, const ItemType& value);
+if there is any invalid position or head is just nullptr
+    return false
+traverse through the code until you reach the position
+    make the new node equal to the value
+    return true
+
+int find(const ItemType& value) const;
+make a new node to find the value
+traverse through until the end of the sequence
+    if you the sequence value equals the value
+        return the position
+        update sequences next
+if not found return -1
+
+void swap(Sequence& other);
+make a temporary node that holds the other head
+make other head equal to orignal head
+make original head equal to temp node
+make a temporary node that holds the other tail
+make other tail equal to orignal tail
+make original tail equal to temp node
+make a temporary int that holds the other size
+make other size equal to orignal size
+make original size equal to temp int
+
+int subsequence(const Sequence& seq1, const Sequence& seq2)
+if the sequences are empty or seq2 is bigger than seq1
+    return -1
+loop throughout the seq1 size
+    if the seq2 size ends up reaching over the traversed amount
+        break out of loop
+    if the value of seq1 equals seq1
+        loop again to see if the following values equal each other
+            if the two do
+                continue or break out if not
+            once the loop reaches its size,
+                return at which point the loop stopped
+return -1 if this was never find
+        
+void concatReverse(const Sequence& seq1, const Sequence& seq2, Sequence& result)
+traverse through and clear out results just in case
+if both sequences are empty
+    return the emptuy results
+otherwise if first seq is empty
+    loop through seq2 and input them into result backwards
+otherwise if second seq is empty
+    loop through seq1 and input them into result backwards
+otherwise if neither are empty
+    first loop through seq1 and input them into result backwards
+    then loop through seq2 and input them into result backwards
+using a temp first is helpful, then set that equal to result
+
+
+CHECKING TEST CASES
+__________________________________________
+
+REQUIREMENT TEST 1:
+
+#include "Sequence.h"
+#include <type_traits>
+
+#define CHECKTYPE(c, f, r, a)  \
+{  \
+ static_assert(std::is_same<decltype(&c::f), r (c::*)a>::value, \
+     "You did not declare " #c "::" #f " as the Project 2 spec does");  \
+ auto p = static_cast<r (c::*)a>(&c::f);  \
+ (void) p;  \
+}
+#define CHECKTYPENONMEMBER(f, r, a)  \
+{  \
+ static_assert(std::is_same<decltype(&f), r (*)a>::value, \
+     "You did not declare " #f " as the Project 2 spec does");  \
+ auto p = static_cast<r (*)a>(f);  \
+ (void) p;  \
+}
+
+static_assert(std::is_default_constructible<Sequence>::value,
+        "Sequence must be default-constructible.");
+static_assert(std::is_copy_constructible<Sequence>::value,
+        "Sequence must be copy-constructible.");
+static_assert(std::is_copy_assignable<Sequence>::value,
+        "Sequence must be assignable.");
+
+void thisFunctionWillNeverBeCalled()
+{
+    CHECKTYPE(Sequence, empty,  bool, () const);
+    CHECKTYPE(Sequence, size,   int,  () const);
+    CHECKTYPE(Sequence, erase,  bool, (int));
+    CHECKTYPE(Sequence, remove, int,  (const ItemType&));
+    CHECKTYPE(Sequence, get,    bool, (int, ItemType&) const);
+    CHECKTYPE(Sequence, set,    bool, (int, const ItemType&));
+    CHECKTYPE(Sequence, find,   int,  (const ItemType&) const);
+    CHECKTYPE(Sequence, swap,   void, (Sequence&));
+    CHECKTYPENONMEMBER(subsequence,   int,  (const Sequence&, const Sequence&));
+    CHECKTYPENONMEMBER(concatReverse, void, (const Sequence&, const Sequence&, Sequence&));
+    { auto p = static_cast<int (Sequence::*)(int, const ItemType&)>(&Sequence::insert); (void) p; }
+    { auto p = static_cast<int (Sequence::*)(const ItemType&)>(&Sequence::insert); (void) p; }
+}
+
+int main()
+{}
+___________________
+REQUIREMENT TEST 2:
+        #include "Sequence.h"
+        #include <string>
+        #include <iostream>
+        #include <cassert>
+        using namespace std;
+
+        void test()
+        {
+            Sequence s;
+            assert(s.insert(0, "lavash") == 0);
+            assert(s.insert(0, "tortilla") == 0);
+            assert(s.size() == 2);
+            ItemType x = "injera";
+            assert(s.get(0, x)  &&  x == "tortilla");
+            assert(s.get(1, x)  &&  x == "lavash");
+        }
+
+        int main()
+        {
+            test();
+            cout << "Passed all tests" << endl;
+        }
+___________________
+REQUIREMENT TEST 3:
+
+        #include "Sequence.h"
+        #include <iostream>
+        #include <cassert>
+        using namespace std;
+
+        void test()
+        {
+            Sequence s;
+            assert(s.insert(0, 10) == 0);
+            assert(s.insert(0, 20) == 0);
+            assert(s.size() == 2);
+            ItemType x = 999;
+            assert(s.get(0, x)  &&  x == 20);
+            assert(s.get(1, x)  &&  x == 10);
+        }
+
+        int main()
+        {
+            test();
+            cout << "Passed all tests" << endl;
+        }
+
+
+___________________
+ALL TEST CASES FOR EACH FUNCTION:
+
+#include "Sequence.h"
+#include <iostream>
+#include <cassert>
+using namespace std;
+
+void test()
+{
+    //default constructor
+    Sequence a;
+    
+    assert(a.insert(0, 10) == 0);   //test insert
+    assert(a.insert(0, 20) == 0);   //test insert before first obj
+    assert(a.size() == 2);  //test size w/ objects
+    ItemType x = 999;
+    assert(a.get(0, x)  &&  x == 20);
+    assert(a.get(1, x)  &&  x == 10);
+    assert(a.find(10) == 1); //find at pos 1 (end)
+    assert(a.find(20) == 0); //find at pos 0
+    
+    Sequence s; //default constructor
+    // For an empty sequence:
+    assert(s.size() == 0);             // test size
+    assert(s.empty());                 // test empty
+    assert(s.remove(0) == 0);  // nothing to remove
+    assert(s.insert(3) == 0); //insert value into empty seq
+    assert(s.insert(4) == 1);   //insert value at end
+    assert(s.insert(4) == 1); //insert same value properly
+    assert(s.erase(0) && s.get(0, x) && x == 4);    //erase pos 0
+    assert(s.find(4) == 0);     //find returns smallest pos
+    
+    Sequence e(s); //copy constructor
+    s=a;   //assinment operator
+    assert(s.size() == 2);
+    
+    Sequence b(a);  //copy constructor
+    assert(b.size() == 2 && b.get(0, x)  &&  x == 20 && b.empty() == false);    //test not empty
+    assert(b.insert(2, 3) == 2 && b.get(2, x)  &&  x == 3);  //insert at size()
+    assert(b.insert(4, 1) == -1); //insert w/ invalid pos
+    assert(b.insert(3) == 0);   //insert value at beginning (pos 0)
+    assert(b.erase(0) && b.find(3) == 2); //erase item at pos 0
+    assert(b.remove(20) == 1);  //remove one element
+    assert(b.insert(20) == 2);  //setting up for next remove test
+    assert(b.get(0, x) && x == 10); //get pos 0
+    assert(b.get(b.size(), x) == false && x == 10); //invalid pos for get
+    assert(b.set(0, 20) && b.get(0, x) && x == 20); //set at pos 0
+    assert(b.set(b.size(), 20) == false && b.get(0, x) && x == 20);    //invalid pos for set
+    assert(b.find(22) == -1); //can't find item
+    
+    Sequence d;
+    d.swap(e); //swap function
+    assert(d.size() == 2 && e.size() == 0 && d.find(4) == 0);  //check if swap function worked
+    
+    //setting up tests for subsequence
+        Sequence g;
+        g.insert(0, 30);
+        g.insert(1, 21);
+        g.insert(2, 63);
+        g.insert(3, 17);
+        g.insert(4, 17);
+        g.insert(5, 63);
+        g.insert(6, 17);
+        g.insert(7, 29);
+        g.insert(8, 8);
+        g.insert(9, 32);
+    
+        Sequence h;
+        h.insert(0, 63);
+        h.insert(1, 17);
+        h.insert(2, 29);
+    
+        Sequence i;
+        i.insert(0, 17);
+        i.insert(1, 63);
+        i.insert(2, 29);
+    
+        Sequence j;
+        j.insert(0, 29);
+        j.insert(1, 8);
+        j.insert(2, 32);
+    
+        Sequence k;
+        k.insert(0, 32);
+        k.insert(1, 2);
+    
+        Sequence f;
+    
+        Sequence m;
+    
+        Sequence l;
+        l.insert(17);
+    
+    Sequence n;
+    n.insert(18);
+    
+    Sequence o;
+    o.insert(0, 63);
+    o.insert(1, 17);
+    o.insert(2, 29);
+    o.insert(3, 7);
+    
+    Sequence p;
+    
+    Sequence q;
+    
+        //subsequence tests
+        assert(subsequence(g, h) == 5); //subsequence present
+        assert(subsequence(g, g) == 0);     //aliasing test
+        assert(subsequence(g, i) == -1);    //subsequence doesn't exist consecutively
+        assert(subsequence(g, j) == 7); //subsequence exists at end
+        assert(subsequence(g, k) == -1);    //k doesn't exist within g (part of k does at end)
+        assert(subsequence(g, f) == -1);    //empty seq2
+        assert(subsequence(g, l) == 3);   //only earliest pos is returned
+        assert(subsequence(f, l) == -1);    //seq1 is empty
+    
+    //concatReverse tests
+    concatReverse(f, m, l);
+    assert(l.size() == 0); //empty seq1 and seq2
+    concatReverse(n, n, l);
+    assert(l.size() == 2 && l.remove(18) == 2);
+    concatReverse(n, k, n);
+    assert(n.find(18) == 0 && n.find(32) == 1 && n.find(2) == 2 && n.size() == 3);
+
+}
+
+int main()
+{
+    test();
+    cout << "Passed all tests" << endl;
+}
+
